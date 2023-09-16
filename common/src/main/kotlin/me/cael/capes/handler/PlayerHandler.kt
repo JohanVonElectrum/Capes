@@ -114,7 +114,7 @@ class PlayerHandler(var profile: GameProfile) {
         connection.connect()
         if (connection.responseCode / 100 == 2) {
             val reader: Reader = InputStreamReader(connection.inputStream, "UTF-8")
-            val cosmetics = JsonParser.parseReader(reader).asJsonObject["user"].asJsonObject["cosmetics"]
+            val cosmetics = JsonParser().parse(reader).asJsonObject["user"].asJsonObject["cosmetics"]
             val result = Gson().fromJson(cosmetics, WynntilsData::class.java)
             return this.setCapeTextureFromBase64(result.texture)
         }

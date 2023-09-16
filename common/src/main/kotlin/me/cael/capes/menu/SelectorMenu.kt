@@ -6,16 +6,17 @@ import me.cael.capes.mixins.AccessorPlayerListEntry
 import me.cael.capes.render.DisplayPlayerEntityRenderer
 import me.cael.capes.render.PlaceholderEntity
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screen.ScreenTexts
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.option.GameOptions
 import net.minecraft.client.render.DiffuseLighting
 import net.minecraft.client.render.entity.EntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
-import net.minecraft.util.math.RotationAxis
+import net.minecraft.text.TranslatableText
+import net.minecraft.util.math.Quaternion
+import net.minecraft.util.math.Vec3f
 
 class SelectorMenu(parent: Screen, gameOptions: GameOptions) : MainMenu(parent, gameOptions) {
 
@@ -27,7 +28,11 @@ class SelectorMenu(parent: Screen, gameOptions: GameOptions) : MainMenu(parent, 
         var buttonW = 200
         val config = Capes.CONFIG
 
-        addDrawableChild(ButtonWidget.builder(config.clientCapeType.getText()) {
+        addDrawableChild(ButtonWidget(
+            (width / 2) - (buttonW / 2), 60,
+            buttonW, 20,
+            config.clientCapeType.getText()
+        ) {
             config.clientCapeType = config.clientCapeType.cycle()
             config.save()
             it.message = config.clientCapeType.getText()
@@ -36,25 +41,36 @@ class SelectorMenu(parent: Screen, gameOptions: GameOptions) : MainMenu(parent, 
                 val playerListEntry = this.client!!.networkHandler!!.getPlayerListEntry(this.client!!.player!!.uuid) as AccessorPlayerListEntry
                 playerListEntry.setTexturesLoaded(false)
             }
-        }.position((width / 2) - (buttonW / 2), 60).size(buttonW, 20).build())
+        })
 
-        addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE) {
+        addDrawableChild(ButtonWidget(
+            (width / 2) - (buttonW / 2), 220,
+            buttonW, 20,
+            ScreenTexts.DONE) {
             client!!.setScreen(parent)
-        }.position((width / 2) - (buttonW / 2), 220).size(buttonW, 20).build())
+        })
 
         buttonW = 100
 
-        addDrawableChild(ButtonWidget.builder(Text.translatable("options.capes.selector.elytra")) {
+        addDrawableChild(ButtonWidget(
+            (width / 4) - (buttonW / 2), 120,
+            buttonW, 20,
+            TranslatableText("options.capes.selector.elytra")
+        ) {
             PlaceholderEntity.showElytra = !PlaceholderEntity.showElytra
-        }.position((width / 4) - (buttonW / 2), 120).size(buttonW, 20).build())
+        })
 
-        addDrawableChild(ButtonWidget.builder(Text.translatable("options.capes.selector.player")) {
+        addDrawableChild(ButtonWidget(
+            (width / 4) - (buttonW / 2), 145,
+            buttonW, 20,
+            TranslatableText("options.capes.selector.player")
+        ) {
             PlaceholderEntity.showBody = !PlaceholderEntity.showBody
-        }.position((width / 4) - (buttonW / 2), 145).size(buttonW, 20).build())
+        })
 
     }
 
-    override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun render(context: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
 
         val playerX : Int = width/2
@@ -83,7 +99,7 @@ class SelectorMenu(parent: Screen, gameOptions: GameOptions) : MainMenu(parent, 
         matrixStack2.translate(0.0, 0.0, 1000.0)
         matrixStack2.scale(size.toFloat(), size.toFloat(), size.toFloat())
 
-        val quaternion = RotationAxis.POSITIVE_Z.rotationDegrees(180.0f)
+        val quaternion = Quaternion(Vec3f.POSITIVE_Z, 180.0f, true)
         matrixStack2.multiply(quaternion)
 
         DiffuseLighting.method_34742()
@@ -94,8 +110,6 @@ class SelectorMenu(parent: Screen, gameOptions: GameOptions) : MainMenu(parent, 
             val ctx = EntityRendererFactory.Context(
                 MinecraftClient.getInstance().entityRenderDispatcher,
                 MinecraftClient.getInstance().itemRenderer,
-                MinecraftClient.getInstance().blockRenderManager,
-                MinecraftClient.getInstance().entityRenderDispatcher.heldItemRenderer,
                 MinecraftClient.getInstance().resourceManager,
                 MinecraftClient.getInstance().entityModelLoader,
                 MinecraftClient.getInstance().textRenderer
